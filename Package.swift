@@ -23,7 +23,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/Apodini/Apodini.git", .upToNextMinor(from: "0.5.0"))
+        .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/tracing")
     ],
     targets: [
         .executableTarget(
@@ -31,7 +31,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Apodini", package: "Apodini"),
                 .product(name: "ApodiniREST", package: "Apodini"),
-                .product(name: "ApodiniOpenAPI", package: "Apodini")
+                .product(name: "ApodiniOpenAPI", package: "Apodini"),
+                .product(name: "ApodiniObserve", package: "Apodini")
             ]
         ),
         .testTarget(
