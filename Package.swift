@@ -12,7 +12,7 @@ import PackageDescription
 
 
 let package = Package(
-    name: "ApodiniTemplate",
+    name: "ApodiniHotRODExample",
     platforms: [
         .macOS(.v12)
     ],

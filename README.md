@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 
 -->
 
-# Apodini Template Repository
+# Apodini HotROD Example
 
-This repository includes an example Apodini web service that can be used as a starting point for an Apodini web service.  
+This repository includes the HotROD (rides on demand) example as an Apodini web service.
 
 ## Build an Apodini Web Service
 

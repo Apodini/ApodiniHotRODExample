@@ -39,9 +39,9 @@ RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/Apodin
     && mv "$(swift build --package-path /build -c release --show-bin-path)/Apodini_ApodiniOpenAPI.resources" ./ \
     && chmod -R a-w ./Apodini_ApodiniOpenAPI.resources \
     || echo No resources to copy
-RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/WebService_ApodiniTemplate.resources" ] \
-    && mv "$(swift build --package-path /build -c release --show-bin-path)/WebService_ApodiniTemplate.resources" ./ \
-    && chmod -R a-w ./WebService_ApodiniTemplate.resources \
+RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/WebService_ApodiniHotRODExample.resources" ] \
+    && mv "$(swift build --package-path /build -c release --show-bin-path)/WebService_ApodiniHotRODExample.resources" ./ \
+    && chmod -R a-w ./WebService_ApodiniHotRODExample.resources \
     || echo No resources to copy
 
 # ================================
