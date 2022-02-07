@@ -22,6 +22,10 @@ let package = Package(
             targets: ["WebService"]
         ),
         .executable(
+            name: "driver",
+            targets: ["driver"]
+        ),
+        .executable(
             name: "route",
             targets: ["route"]
         )
@@ -43,6 +47,16 @@ let package = Package(
             name: "WebServiceTests",
             dependencies: [
                 .target(name: "WebService")
+            ]
+        ),
+        .executableTarget(
+            name: "driver",
+            dependencies: [
+                .product(name: "Apodini", package: "Apodini"),
+                .product(name: "ApodiniHTTP", package: "Apodini"),
+                .product(name: "ApodiniObserve", package: "Apodini"),
+                .target(name: "Models"),
+                .target(name: "Utils")
             ]
         ),
         .executableTarget(
