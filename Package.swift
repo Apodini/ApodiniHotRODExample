@@ -40,6 +40,8 @@ let package = Package(
             dependencies: [
                 .target(name: "WebService")
             ]
-        )
+        ),
+
+        .target(name: "Utils")
     ]
 )
