@@ -20,6 +20,10 @@ let package = Package(
         .executable(
             name: "WebService",
             targets: ["WebService"]
+        ),
+        .executable(
+            name: "route",
+            targets: ["route"]
         )
     ],
     dependencies: [
@@ -39,6 +43,15 @@ let package = Package(
             name: "WebServiceTests",
             dependencies: [
                 .target(name: "WebService")
+            ]
+        ),
+        .executableTarget(
+            name: "route",
+            dependencies: [
+                .product(name: "Apodini", package: "Apodini"),
+                .product(name: "ApodiniHTTP", package: "Apodini"),
+                .target(name: "Models"),
+                .target(name: "Utils")
             ]
         ),
 
