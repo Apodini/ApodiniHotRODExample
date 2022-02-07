@@ -42,6 +42,12 @@ let package = Package(
             ]
         ),
 
+        .target(
+            name: "Models",
+            dependencies: [
+                .product(name: "Apodini", package: "Apodini")
+            ]
+        ),
         .target(name: "Utils")
     ]
 )
