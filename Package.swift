@@ -14,7 +14,7 @@ import PackageDescription
 let package = Package(
     name: "ApodiniHotRODExample",
     platforms: [
-        .macOS(.v12)
+        .macOS(.v11)
     ],
     products: [
         .executable(
@@ -39,8 +39,10 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/tracing")
-        .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .upToNextMinor(from: "0.3.3"))
+//        .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/tracing"),
+//        .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .upToNextMinor(from: "0.3.3"))
+        .package(name: "Apodini", path: "../Apodini-review"),
+        .package(name: "ApodiniAsyncHTTPClient", path: "../ApodiniAsyncHTTPClient")
     ],
     targets: [
         .executableTarget(
