@@ -22,6 +22,10 @@ let package = Package(
             targets: ["WebService"]
         ),
         .executable(
+            name: "frontend",
+            targets: ["frontend"]
+        ),
+        .executable(
             name: "customer",
             targets: ["customer"]
         ),
@@ -36,6 +40,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/tracing")
+        .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .upToNextMinor(from: "0.3.3"))
     ],
     targets: [
         .executableTarget(
@@ -51,6 +56,18 @@ let package = Package(
             name: "WebServiceTests",
             dependencies: [
                 .target(name: "WebService")
+            ]
+        ),
+        .executableTarget(
+            name: "frontend",
+            dependencies: [
+                .product(name: "Apodini", package: "Apodini"),
+                .product(name: "ApodiniHTTP", package: "Apodini"),
+                .product(name: "ApodiniAsyncHTTPClient", package: "ApodiniAsyncHTTPClient"),
+                .target(name: "Models")
+            ],
+            resources: [
+                .process("Resources")
             ]
         ),
         .executableTarget(
