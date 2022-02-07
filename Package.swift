@@ -18,10 +18,6 @@ let package = Package(
     ],
     products: [
         .executable(
-            name: "WebService",
-            targets: ["WebService"]
-        ),
-        .executable(
             name: "frontend",
             targets: ["frontend"]
         ),
@@ -45,21 +41,6 @@ let package = Package(
         .package(name: "ApodiniAsyncHTTPClient", path: "../ApodiniAsyncHTTPClient")
     ],
     targets: [
-        .executableTarget(
-            name: "WebService",
-            dependencies: [
-                .product(name: "Apodini", package: "Apodini"),
-                .product(name: "ApodiniREST", package: "Apodini"),
-                .product(name: "ApodiniOpenAPI", package: "Apodini"),
-                .product(name: "ApodiniObserve", package: "Apodini")
-            ]
-        ),
-        .testTarget(
-            name: "WebServiceTests",
-            dependencies: [
-                .target(name: "WebService")
-            ]
-        ),
         .executableTarget(
             name: "frontend",
             dependencies: [
