@@ -58,6 +58,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Apodini", package: "Apodini"),
                 .product(name: "ApodiniHTTP", package: "Apodini"),
+                .product(name: "ApodiniObserve", package: "Apodini"),
+                .product(name: "ApodiniObserveOpenTelemetry", package: "Apodini"),
                 .target(name: "Models"),
                 .target(name: "Utils")
             ]

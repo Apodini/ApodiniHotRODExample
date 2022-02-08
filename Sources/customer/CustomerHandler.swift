@@ -7,7 +7,9 @@
 //
 
 import Apodini
+import ApodiniObserve
 import Models
+import Tracing
 
 struct CustomerHandler: Handler {
     @Parameter var customer: String
@@ -15,8 +17,11 @@ struct CustomerHandler: Handler {
     @Environment(\.databaseService)
     var databaseService
 
+    @EnvironmentObject
+    var baggage: Baggage
+
     func handle() throws -> Customer {
-        let customer = try databaseService.get(customerId: customer)
+        let customer = try databaseService.get(customerId: customer, baggage: baggage)
         return customer
     }
 }

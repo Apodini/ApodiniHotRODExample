@@ -10,6 +10,7 @@ import Apodini
 import Foundation
 import Logging
 import Models
+import Tracing
 import Utils
 
 enum Constants {
@@ -43,33 +44,85 @@ fileprivate let customers: [String: Customer] = [
 /// The DatabaseService simulates a Customer repository implemented on top of an SQL database.
 final class DatabaseService {
     private let logger: Logger
+    private let tracer: Tracer
 
-    init(logger: Logger) {
+    init(logger: Logger, tracer: Tracer) {
         self.logger = logger
+        self.tracer = tracer
     }
 
-    func get(customerId: String) throws -> Customer {
+    func get(customerId: String, baggage: Baggage) throws -> Customer {
         logger.info("Loading customer", metadata: ["customer_id": .string(customerId)])
 
-        // TODO: Simulate SQL Span
+        return try tracer.withSpan("SQL SELECT", baggage: baggage, ofKind: .client) { span in
+            span.attributes.peer.service = "mysql"
+            span.attributes.sql.query = "SELECT * FROM customer WHERE customer_id=\(customerId)"
 
-        // simulate SQL delay
-        Delay.sleep(Constants.getDelayMean, Constants.getDelayStandardDeviation)
+            // simulate SQL delay
+            Delay.sleep(Constants.getDelayMean, Constants.getDelayStandardDeviation)
 
-        guard let customer = customers[customerId] else {
-            throw ApodiniError(type: .notFound, reason: "invalid customer id")
+            guard let customer = customers[customerId] else {
+                throw ApodiniError(type: .notFound, reason: "invalid customer id")
+            }
+
+            return customer
         }
-
-        return customer
     }
 }
+
+// MARK: - Application
 
 extension Application {
     var databaseService: DatabaseService {
         guard let databaseService = self.storage[\Application.databaseService] else {
-            self.storage[\Application.databaseService] = DatabaseService(logger: logger)
+            self.storage[\Application.databaseService] = DatabaseService(logger: logger, tracer: tracer)
             return self.databaseService
         }
         return databaseService
+    }
+}
+
+// MARK: - Tracing
+
+// These span attributes mimic the original HotROD example
+// They don't follow the recommendations for the OpenTelemetry spec: https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/trace/semantic_conventions
+
+extension SpanAttributes {
+    var peer: PeerSpanAttributes {
+        get { .init(attributes: self) }
+        set { self = newValue.attributes }
+    }
+}
+
+@dynamicMemberLookup
+struct PeerSpanAttributes: SpanAttributeNamespace {
+    var attributes: SpanAttributes
+
+    struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+        init() {}
+
+        var service: Key<String> {
+            "peer.service"
+        }
+    }
+}
+
+extension SpanAttributes {
+    var sql: SQLSpanAttributes {
+        get { .init(attributes: self) }
+        set { self = newValue.attributes }
+    }
+}
+
+@dynamicMemberLookup
+struct SQLSpanAttributes: SpanAttributeNamespace {
+    var attributes: SpanAttributes
+
+    struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+        init() {}
+
+        var query: Key<String> {
+            "sql.query"
+        }
     }
 }
