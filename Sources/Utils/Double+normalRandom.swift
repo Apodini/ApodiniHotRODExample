@@ -22,6 +22,6 @@ extension Double {
 
         let u1 = 1.0 - uniformRandom()
         let u2 = 1.0 - uniformRandom()
-        return sqrt(-2 * log(u1)) * sin(2 * .pi * u2)
+        return abs(sqrt(-2 * log(u1)) * sin(2 * .pi * u2))
     }
 }
