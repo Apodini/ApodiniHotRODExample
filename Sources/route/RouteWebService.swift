@@ -8,6 +8,8 @@
 
 import Apodini
 import ApodiniHTTP
+import ApodiniObserve
+import ApodiniObserveOpenTelemetry
 import ArgumentParser
 
 @main
@@ -18,11 +20,17 @@ struct RouteWebService: WebService {
     var configuration: Configuration {
         HTTP()
         HTTPConfiguration(bindAddress: .interface("0.0.0.0", port: port))
+
+        TracingConfiguration(
+            InstrumentConfiguration(JaegerBaggageExtractorInstrument()),
+            .defaultOpenTelemetry(serviceName: "route")
+        )
     }
 
     var content: some Component {
         Group("route") {
             RouteHandler()
         }
+        .trace()
     }
 }
