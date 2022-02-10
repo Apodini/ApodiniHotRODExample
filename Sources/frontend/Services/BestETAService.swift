@@ -11,33 +11,59 @@ import ApodiniAsyncHTTPClient
 import Foundation
 import Logging
 import Models
+import Tracing
 
 final class BestETAService {
     private let httpClient: HTTPClient
     private let logger: Logger
+    private let instrument: Instrument
+    private let tracer: Tracer
 
-    init(httpClient: HTTPClient, logger: Logger) {
+    private let formatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .abbreviated
+        formatter.zeroFormattingBehavior = .dropLeading
+        return formatter
+    }()
+
+    init(
+        httpClient: HTTPClient,
+        logger: Logger,
+        tracer: Tracer,
+        instrument: Instrument
+    ) {
         self.httpClient = httpClient
         self.logger = logger
+        self.instrument = instrument
+        self.tracer = tracer
     }
 
-    func get(customerId: String) async throws -> ETAResponse {
-        let customer = try await getCustomer(customerId: customerId)
+    func get(customerId: String, span: Span) async throws -> ETAResponse {
+        let customer = try await getCustomer(customerId: customerId, baggage: span.baggage)
         logger.info("Found customer", metadata: ["customer": .string(customer.name)])
 
-        // TODO: Set customer to span
-
-        let drivers = try await getNearestDrivers(location: customer.location)
+        // can't set add the customer to the baggage because it's read-only in swift-distributed-tracing
+        let drivers = try await getNearestDrivers(location: customer.location, baggage: span.baggage)
         logger.info("Found drivers", metadata: ["drivers": .array(drivers.map({ .string($0.driverId) }))])
 
-        let results = try await getRoutes(customer: customer, drivers: drivers)
+        let results = try await getRoutes(customer: customer, drivers: drivers, baggage: span.baggage)
         logger.info("Found routes", metadata: ["routes": .array(results.map({ .stringConvertible($0.route.eta) }))])
 
         guard let response = results.sorted(by: \.route.eta).first else {
             throw ApodiniError(type: .serverError, reason: "no routes found")
         }
 
-        logger.info("Dispatch successful", metadata: ["driver": .string(response.driver), "eta": .stringConvertible(response.route.eta)])
+        logger.info("Dispatch successful", metadata: ["driver": .string(response.driver), "eta": .string(format(timeInterval: response.route.eta))])
+
+        // manually record span event
+        // in the example, logs are automatically recorded as span events
+        span.addEvent(.init(
+            name: "Dispatch successful",
+            attributes: [
+                "driver": .string(response.driver),
+                "eta": .string(format(timeInterval: response.route.eta))
+            ]
+        ))
 
         return ETAResponse(
             eta: Int(response.route.eta * 1000000 * 1000), // frontend expects nanoseconds
@@ -57,18 +83,15 @@ struct ETAResponse: Content {
 }
 
 extension BestETAService {
-    private func getCustomer(customerId: String) async throws -> Customer {
-        try await httpClient
-            .get(url: "http://0.0.0.0:8081/customer?customer=\(customerId)")
+    private func getCustomer(customerId: String, baggage: Baggage) async throws -> Customer {
+        try await getRequest(to: "http://0.0.0.0:8081/customer?customer=\(customerId)", baggage: baggage)
             .flatMapThrowing { response -> Customer in
-//                span.set(Int(response.status.code), forKey: "status-code")
                 guard (200..<300).contains(response.status.code) else {
                     throw ApodiniError(type: .notFound, reason: "\(response.status)")
                 }
                 guard let body = response.body else {
                     throw ApodiniError(type: .notFound, reason: "Response was empty")
                 }
-//                span.set(Data(buffer: body), forKey: "body")
                 return try JSONDecoder().decode(Customer.self, from: body)
             }
             .get()
@@ -76,22 +99,19 @@ extension BestETAService {
 }
 
 extension BestETAService {
-    private func getNearestDrivers(location: String) async throws -> [DriverLocation] {
+    private func getNearestDrivers(location: String, baggage: Baggage) async throws -> [DriverLocation] {
         struct FindNearestResponse: Decodable {
             var locations: [DriverLocation]
         }
 
-        return try await httpClient
-            .get(url: "http://0.0.0.0:8082/driver?location=\(location)")
+        return try await getRequest(to: "http://0.0.0.0:8082/driver?location=\(location)", baggage: baggage)
             .flatMapThrowing { response -> [DriverLocation] in
-//                span.set(Int(response.status.code), forKey: "status-code")
                 guard (200..<300).contains(response.status.code) else {
                     throw ApodiniError(type: .notFound, reason: "\(response.status)")
                 }
                 guard let body = response.body else {
                     throw ApodiniError(type: .notFound, reason: "Response was empty")
                 }
-//                span.set(Data(buffer: body), forKey: "body")
                 return try JSONDecoder().decode(FindNearestResponse.self, from: body).locations
             }
             .get()
@@ -99,10 +119,10 @@ extension BestETAService {
 }
 
 extension BestETAService {
-    private func getRoutes(customer: Customer, drivers: [DriverLocation]) async throws -> [RouteResult] {
-        let futures = drivers
+    private func getRoutes(customer: Customer, drivers: [DriverLocation], baggage: Baggage) async throws -> [RouteResult] {
+        let futures = try drivers
             .map { driver in
-                getRoute(pickup: driver.location, dropoff: customer.location)
+                try getRoute(pickup: driver.location, dropoff: customer.location, baggage: baggage)
                     .map { RouteResult(driver: driver.driverId, route: $0) }
                     .inspectFailure { error in
                         self.logger.error(
@@ -130,11 +150,9 @@ extension BestETAService {
             .get()
     }
 
-    private func getRoute(pickup: String, dropoff: String) -> EventLoopFuture<Route> {
-        httpClient
-            .get(url: "http://0.0.0.0:8083/route?pickup=\(pickup)&dropoff=\(dropoff)")
+    private func getRoute(pickup: String, dropoff: String, baggage: Baggage) throws -> EventLoopFuture<Route> {
+        try getRequest(to: "http://0.0.0.0:8083/route?pickup=\(pickup)&dropoff=\(dropoff)", baggage: baggage)
             .flatMapThrowing { response -> Route in
-//                span.set(Int(response.status.code), forKey: "status-code")
                 self.logger.info("Route response", metadata: ["status_code": .stringConvertible(response.status.code)])
                 guard (200..<300).contains(response.status.code) else {
                     throw ApodiniError(type: .notFound, reason: "\(response.status)")
@@ -142,7 +160,6 @@ extension BestETAService {
                 guard let body = response.body else {
                     throw ApodiniError(type: .notFound, reason: "Response was empty")
                 }
-//                span.set(Data(buffer: body), forKey: "body")
                 return try JSONDecoder().decode(Route.self, from: body)
             }
     }
@@ -153,10 +170,44 @@ extension BestETAService {
     }
 }
 
+extension BestETAService {
+    func getRequest(to url: String, baggage: Baggage) throws -> EventLoopFuture<HTTPClient.Response> {
+        var request = try HTTPClient.Request(url: url)
+
+        let span = tracer.startSpan("HTTP \(request.method.rawValue)", baggage: baggage, ofKind: .client)
+        span.attributes["component"] = "AsyncHTTPClient"
+        span.attributes.http.method = request.method.rawValue
+        span.attributes.http.url = request.url.absoluteString
+        instrument.inject(span.baggage, into: &request.headers, using: HTTPHeadersInjector())
+
+        return httpClient
+            .execute(request: request)
+            .always { result in
+                switch result {
+                case let .success(response):
+                    span.setStatus(.init(responseStatus: response.status))
+                    span.attributes.http.statusCode = Int(response.status.code)
+                    span.attributes.http.statusText = response.status.reasonPhrase
+                    span.attributes.http.responseContentLength = response.body?.readableBytes ?? 0
+                case let .failure(error):
+                    span.recordError(error)
+                    span.setStatus(.init(code: .error, message: error.localizedDescription))
+                }
+                span.end()
+            }
+    }
+}
+
+extension BestETAService {
+    func format(timeInterval: TimeInterval) -> String {
+        formatter.string(from: timeInterval) ?? "n/a"
+    }
+}
+
 extension Application {
     var bestETAService: BestETAService {
         guard let bestETAService = self.storage[\Application.bestETAService] else {
-            self.storage[\Application.bestETAService] = BestETAService(httpClient: httpClient, logger: logger)
+            self.storage[\Application.bestETAService] = BestETAService(httpClient: httpClient, logger: logger, tracer: tracer, instrument: instrument)
             return self.bestETAService
         }
         return bestETAService

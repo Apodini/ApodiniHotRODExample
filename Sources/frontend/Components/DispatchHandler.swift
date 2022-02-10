@@ -7,6 +7,7 @@
 //
 
 import Apodini
+import Tracing
 
 struct DispatchHandler: Handler {
     @Parameter var customer: String
@@ -14,8 +15,11 @@ struct DispatchHandler: Handler {
     @Environment(\.bestETAService)
     var bestETAService
 
+    @EnvironmentObject
+    var span: Span
+
     func handle() async throws -> ETAResponse {
-        let etaResponse = try await bestETAService.get(customerId: customer)
+        let etaResponse = try await bestETAService.get(customerId: customer, span: span)
         return etaResponse
     }
 }

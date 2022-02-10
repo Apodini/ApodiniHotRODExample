@@ -46,6 +46,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Apodini", package: "Apodini"),
                 .product(name: "ApodiniHTTP", package: "Apodini"),
+                .product(name: "ApodiniObserve", package: "Apodini"),
+                .product(name: "ApodiniObserveOpenTelemetry", package: "Apodini"),
                 .product(name: "ApodiniAsyncHTTPClient", package: "ApodiniAsyncHTTPClient"),
                 .target(name: "Models")
             ],

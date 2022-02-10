@@ -8,6 +8,8 @@
 
 import Apodini
 import ApodiniHTTP
+import ApodiniObserve
+import ApodiniObserveOpenTelemetry
 import ArgumentParser
 
 @main
@@ -22,6 +24,11 @@ struct FrontendWebService: WebService {
         HTTP()
         HTTPConfiguration(bindAddress: .interface("0.0.0.0", port: port))
 
+        TracingConfiguration(
+            InstrumentConfiguration(JaegerBaggageExtractorInstrument()),
+            .defaultOpenTelemetry(serviceName: "frontend")
+        )
+
 //        EnvironmentValue(jaegerUI, \Application.jaegerUI)
     }
 
@@ -29,9 +36,11 @@ struct FrontendWebService: WebService {
         Group("dispatch") {
             DispatchHandler()
         }
+        .trace()
         Group("config") {
             ConfigHandler(jaegerUI: jaegerUI)
         }
+        .trace()
         StaticFilesComponent()
         StaticFilesHandler(fileName: .constant(""))
     }
