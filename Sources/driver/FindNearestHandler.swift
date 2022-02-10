@@ -9,6 +9,7 @@
 import Apodini
 import ApodiniObserve
 import Models
+import Tracing
 
 struct FindNearestHandler: Handler {
     @Parameter var location: String
@@ -22,16 +23,19 @@ struct FindNearestHandler: Handler {
     @ApodiniLogger
     var logger
 
+    @EnvironmentObject
+    var span: Span
+
     func handle() throws -> FindNearestResponse {
         logger.info("Searching for nearby drivers", metadata: ["location": .string(location)])
-        let driverIds = redisService.findDriverIds(location: location)
+        let driverIds = redisService.findDriverIds(location: location, baggage: span.baggage)
 
         let result = try driverIds
             .compactMap { driverId -> DriverLocation? in
                 var result: Result<DriverLocation, Error>?
                 for i in 0..<3 {
                     do {
-                        let driver = try redisService.getDriver(driverId: driverId)
+                        let driver = try redisService.getDriver(driverId: driverId, baggage: span.baggage)
                         result = .success(driver)
                         break
                     } catch {
@@ -43,8 +47,10 @@ struct FindNearestHandler: Handler {
                 guard let result = result else { throw internalServerError }
 
                 switch result {
-                case .failure:
-                    logger.error("Failed to get driver after 3 attempts") // TODO: Attach error
+                case let .failure(error):
+                    logger.error("Failed to get driver after 3 attempts")
+                    span.recordError(error)
+                    span.setStatus(.init(code: .error, message: error.standardMessage))
                     return nil
                 case let .success(driver):
                     return driver

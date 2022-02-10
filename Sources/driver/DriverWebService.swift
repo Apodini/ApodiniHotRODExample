@@ -9,6 +9,7 @@
 import Apodini
 import ApodiniHTTP
 import ApodiniObserve
+import ApodiniObserveOpenTelemetry
 import ArgumentParser
 import Logging
 
@@ -22,11 +23,17 @@ struct DriverWebService: WebService {
         HTTPConfiguration(bindAddress: .interface("0.0.0.0", port: port))
 
         LoggerConfiguration(logHandlers: StreamLogHandler.standardError, logLevel: .info)
+
+        TracingConfiguration(
+            InstrumentConfiguration(JaegerBaggageExtractorInstrument()),
+            .defaultOpenTelemetry(serviceName: "driver")
+        )
     }
 
     var content: some Component {
         Group("driver") {
             FindNearestHandler()
         }
+        .trace()
     }
 }
