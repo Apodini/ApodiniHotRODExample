@@ -7,7 +7,6 @@
 //
 
 import Apodini
-import ApodiniObserve
 import Models
 import Tracing
 
@@ -18,10 +17,10 @@ struct CustomerHandler: Handler {
     var databaseService
 
     @EnvironmentObject
-    var baggage: Baggage
+    var span: Span
 
     func handle() throws -> Customer {
-        let customer = try databaseService.get(customerId: customer, baggage: baggage)
+        let customer = try databaseService.get(customerId: customer, baggage: span.baggage)
         return customer
     }
 }
