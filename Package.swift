@@ -35,8 +35,8 @@ let package = Package(
         )
     ],
     dependencies: [
-//        .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/tracing"),
-//        .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .upToNextMinor(from: "0.3.3"))
+        // .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/tracing"),
+        // .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .upToNextMinor(from: "0.3.3"))
         .package(name: "Apodini", path: "../Apodini-review"),
         .package(name: "ApodiniAsyncHTTPClient", path: "../ApodiniAsyncHTTPClient")
     ],

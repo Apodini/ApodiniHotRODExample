@@ -29,12 +29,6 @@ extension SpanAttributes {
 
 @dynamicMemberLookup
 struct HTTPAttributes: SpanAttributeNamespace {
-    var attributes: SpanAttributes
-
-    init(attributes: SpanAttributes) {
-        self.attributes = attributes
-    }
-
     struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         init() {}
 
@@ -44,6 +38,12 @@ struct HTTPAttributes: SpanAttributeNamespace {
         var statusCode: Key<Int> { "http.status_code" }
         var statusText: Key<String> { "http.status_text" }
         var responseContentLength: Key<Int> { "http.response_content_length" }
+    }
+
+    var attributes: SpanAttributes
+
+    init(attributes: SpanAttributes) {
+        self.attributes = attributes
     }
 }
 

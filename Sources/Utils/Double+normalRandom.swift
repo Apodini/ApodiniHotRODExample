@@ -20,8 +20,8 @@ extension Double {
             Double.random(in: 0.nextUp...1)
         }
 
-        let u1 = 1.0 - uniformRandom()
-        let u2 = 1.0 - uniformRandom()
+        let u1 = 1.0 - uniformRandom() // swiftlint:disable:this identifier_name
+        let u2 = 1.0 - uniformRandom() // swiftlint:disable:this identifier_name
         return abs(sqrt(-2 * log(u1)) * sin(2 * .pi * u2))
     }
 }

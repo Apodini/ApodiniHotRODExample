@@ -18,31 +18,31 @@ enum Constants {
     static let getDelayStandardDeviation: TimeInterval = getDelayMean / 10
 }
 
-fileprivate let customers: [String: Customer] = [
-    "123": Customer(
-        id: "123",
-        name: "Rachel's Floral Designs",
-        location: "115,277"
-    ),
-    "567": Customer(
-        id: "567",
-        name: "Amazing Coffee Roasters",
-        location: "211,653"
-    ),
-    "392": Customer(
-        id: "392",
-        name: "Trom Chocolatier",
-        location: "577,322"
-    ),
-    "731": Customer(
-        id: "731",
-        name: "Japanese Desserts",
-        location: "728,326"
-    )
-]
-
 /// The DatabaseService simulates a Customer repository implemented on top of an SQL database.
 final class DatabaseService {
+    private let customers: [String: Customer] = [
+        "123": Customer(
+            id: "123",
+            name: "Rachel's Floral Designs",
+            location: "115,277"
+        ),
+        "567": Customer(
+            id: "567",
+            name: "Amazing Coffee Roasters",
+            location: "211,653"
+        ),
+        "392": Customer(
+            id: "392",
+            name: "Trom Chocolatier",
+            location: "577,322"
+        ),
+        "731": Customer(
+            id: "731",
+            name: "Japanese Desserts",
+            location: "728,326"
+        )
+    ]
+
     private let logger: Logger
     private let tracer: Tracer
 
@@ -96,8 +96,6 @@ extension SpanAttributes {
 
 @dynamicMemberLookup
 struct PeerSpanAttributes: SpanAttributeNamespace {
-    var attributes: SpanAttributes
-
     struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         init() {}
 
@@ -105,6 +103,8 @@ struct PeerSpanAttributes: SpanAttributeNamespace {
             "peer.service"
         }
     }
+
+    var attributes: SpanAttributes
 }
 
 extension SpanAttributes {
@@ -116,8 +116,6 @@ extension SpanAttributes {
 
 @dynamicMemberLookup
 struct SQLSpanAttributes: SpanAttributeNamespace {
-    var attributes: SpanAttributes
-
     struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         init() {}
 
@@ -125,4 +123,6 @@ struct SQLSpanAttributes: SpanAttributeNamespace {
             "sql.query"
         }
     }
+
+    var attributes: SpanAttributes
 }

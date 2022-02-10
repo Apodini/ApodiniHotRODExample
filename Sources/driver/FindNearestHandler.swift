@@ -33,14 +33,14 @@ struct FindNearestHandler: Handler {
         let result = try driverIds
             .compactMap { driverId -> DriverLocation? in
                 var result: Result<DriverLocation, Error>?
-                for i in 0..<3 {
+                for retry in 0..<3 {
                     do {
                         let driver = try redisService.getDriver(driverId: driverId, baggage: span.baggage)
                         result = .success(driver)
                         break
                     } catch {
                         result = .failure(error)
-                        logger.error("Retrying GetDriver after error", metadata: ["retry_no": .stringConvertible(i + 1)])
+                        logger.error("Retrying GetDriver after error", metadata: ["retry_no": .stringConvertible(retry + 1)])
                     }
                 }
 

@@ -45,5 +45,3 @@ struct FrontendWebService: WebService {
         StaticFilesHandler(fileName: .constant(""))
     }
 }
-
-

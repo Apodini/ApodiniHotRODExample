@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Namespace for the `sleep(_:_:)` function.
 public enum Delay {
     /// Sleeps the thread using a normally distributed random delay with given mean and standard deviation.
     ///

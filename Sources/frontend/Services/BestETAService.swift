@@ -49,7 +49,7 @@ final class BestETAService {
         let results = try await getRoutes(customer: customer, drivers: drivers, baggage: span.baggage)
         logger.info("Found routes", metadata: ["routes": .array(results.map({ .stringConvertible($0.route.eta) }))])
 
-        guard let response = results.sorted(by: \.route.eta).first else {
+        guard let response = results.min(by: \.route.eta) else {
             throw ApodiniError(type: .serverError, reason: "no routes found")
         }
 
@@ -73,13 +73,13 @@ final class BestETAService {
 }
 
 struct ETAResponse: Content {
-    var eta: Int
-    var driver: String
-
     enum CodingKeys: String, CodingKey {
         case eta = "ETA"
         case driver = "Driver"
     }
+
+    var eta: Int
+    var driver: String
 }
 
 extension BestETAService {
@@ -119,6 +119,11 @@ extension BestETAService {
 }
 
 extension BestETAService {
+    struct RouteResult: Content {
+        var driver: String
+        var route: Route
+    }
+
     private func getRoutes(customer: Customer, drivers: [DriverLocation], baggage: Baggage) async throws -> [RouteResult] {
         let futures = try drivers
             .map { driver in
@@ -142,11 +147,13 @@ extension BestETAService {
                 results.compactMap { result -> RouteResult? in
                     // somehow we always get one failure with a connection closed by peer error
                     // ignore it for now
-                    guard case let .success(routeResult) = result else { return nil }
+                    guard case let .success(routeResult) = result else {
+                        return nil
+                    }
                     return routeResult
                 }
             }
-//            .whenAllSucceed(futures, on: httpClient.eventLoopGroup.next())
+            // .whenAllSucceed(futures, on: httpClient.eventLoopGroup.next())
             .get()
     }
 
@@ -162,11 +169,6 @@ extension BestETAService {
                 }
                 return try JSONDecoder().decode(Route.self, from: body)
             }
-    }
-
-    struct RouteResult: Content {
-        var driver: String
-        var route: Route
     }
 }
 
