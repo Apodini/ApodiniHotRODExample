@@ -49,7 +49,7 @@ final class BestETAService {
         let results = try await getRoutes(customer: customer, drivers: drivers, baggage: span.baggage)
         logger.info("Found routes", metadata: ["routes": .array(results.map({ .stringConvertible($0.route.eta) }))])
 
-        guard let response = results.min(by: \.route.eta) else {
+        guard let response = results.min(by: { $0.route.eta < $1.route.eta }) else {
             throw ApodiniError(type: .serverError, reason: "no routes found")
         }
 

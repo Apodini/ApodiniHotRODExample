@@ -61,7 +61,7 @@ final class RedisService {
                 try errorSimulator.checkError()
             } catch {
                 span.setStatus(.init(code: .error, message: error.standardMessage))
-                throw error
+                throw error // records error in span
             }
 
             return DriverLocation(
