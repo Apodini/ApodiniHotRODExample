@@ -11,6 +11,24 @@
         }
       },
       {
+        "package": "Apodini",
+        "repositoryURL": "https://github.com/Apodini/Apodini.git",
+        "state": {
+          "branch": "feature/automatic-tracing",
+          "revision": "0963998c146bc1bfc375335b58b743a6fbc9d08e",
+          "version": null
+        }
+      },
+      {
+        "package": "ApodiniAsyncHTTPClient",
+        "repositoryURL": "https://github.com/Apodini/ApodiniAsyncHTTPClient.git",
+        "state": {
+          "branch": "bots/update-dependencies",
+          "revision": "642949ca06598eaf080d251de7b7b0773476eff5",
+          "version": null
+        }
+      },
+      {
         "package": "ApodiniDocumentExport",
         "repositoryURL": "https://github.com/Apodini/ApodiniDocumentExport.git",
         "state": {
@@ -33,8 +51,8 @@
         "repositoryURL": "https://github.com/Apodini/ApodiniTypeInformation.git",
         "state": {
           "branch": null,
-          "revision": "ab8fd4fc28c446df09e3b451789d03d53dc82cf9",
-          "version": "0.3.4"
+          "revision": "40247bedd5153b7641e95a11bd826b16a15fd12e",
+          "version": "0.3.6"
         }
       },
       {
@@ -51,8 +69,8 @@
         "repositoryURL": "https://github.com/swift-server/async-http-client.git",
         "state": {
           "branch": null,
-          "revision": "cbf533073d9a5edfb16c266d14151f69137ba7c9",
-          "version": "1.8.2"
+          "revision": "7a4dfe026f6ee0f8ad741b58df74c60af296365d",
+          "version": "1.9.0"
         }
       },
       {
@@ -105,8 +123,8 @@
         "repositoryURL": "https://github.com/grpc/grpc-swift.git",
         "state": {
           "branch": null,
-          "revision": "5cc08ebf77e68598bfe4c793927d0f2838598607",
-          "version": "1.6.1"
+          "revision": "d7961746769616d0b81bda771de5648ebfa1abf9",
+          "version": "1.7.1"
         }
       },
       {
@@ -357,8 +375,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "51c3fc2e4a0fcdf4a25089b288dd65b73df1b0ef",
-          "version": "2.37.0"
+          "revision": "154f1d32366449dcccf6375a173adf4ed2a74429",
+          "version": "2.38.0"
         }
       },
       {
@@ -375,8 +393,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
         "state": {
           "branch": null,
-          "revision": "6e94a7be32891d1b303a3fcfde8b5bf64d162e74",
-          "version": "1.19.1"
+          "revision": "000ca94f9de92c95b9ac85d44600b7b0fe25a3e5",
+          "version": "1.19.2"
         }
       },
       {
