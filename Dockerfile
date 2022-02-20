@@ -24,7 +24,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
 WORKDIR /build
 
 # Copy all source files
-COPY Package.swift Package.resolved .
+COPY Package.swift Package.resolved ./
 COPY Sources Sources
 
 # Build everything, with optimizations
