@@ -11,11 +11,14 @@
 # ================================
 FROM swiftlang/swift:nightly-5.5-focal as build
 
-# Install OS updates and, if needed, sqlite3
+# Build a specific service
+ARG service
+ENV service=$service
+
+# Install OS updates
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
-    && apt-get install -y libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up a build area
@@ -25,23 +28,19 @@ WORKDIR /build
 COPY . .
 
 # Build everything, with optimizations
-RUN swift build -c release
+RUN swift build --product $service -c release
 
 # Switch to the staging area
 WORKDIR /staging
 
 # Copy main executable to staging area
-RUN cp "$(swift build --package-path /build -c release --show-bin-path)/WebService" ./
+RUN cp "$(swift build --package-path /build --product $service -c release --show-bin-path)/$service" ./
 
 # Copy resources from the resources directory if the directories exist
 # Ensure that by default, neither the directory nor any of its contents are writable.
-RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/Apodini_ApodiniOpenAPI.resources" ] \
-    && mv "$(swift build --package-path /build -c release --show-bin-path)/Apodini_ApodiniOpenAPI.resources" ./ \
-    && chmod -R a-w ./Apodini_ApodiniOpenAPI.resources \
-    || echo No resources to copy
-RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/WebService_ApodiniHotRODExample.resources" ] \
-    && mv "$(swift build --package-path /build -c release --show-bin-path)/WebService_ApodiniHotRODExample.resources" ./ \
-    && chmod -R a-w ./WebService_ApodiniHotRODExample.resources \
+RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.bundle" ] \
+    && mv "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.bundle" ./ \
+    && chmod -R a-w .ApodiniHotRODExample_frontend.bundle \
     || echo No resources to copy
 
 # ================================
@@ -68,5 +67,5 @@ COPY --from=build --chown=apodini:apodini /staging /app
 USER apodini:apodini
 
 # Start the Apodini service when the image is run.
-# The default port is 80. Can be adapted using the `--port` argument
-ENTRYPOINT ["./WebService"]
+# The port can be adapted using the `--port` argument.
+ENTRYPOINT ["./$service"]

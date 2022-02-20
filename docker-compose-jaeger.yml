@@ -1,0 +1,32 @@
+#
+# This source file is part of the Apodini HotROD example open source project
+#
+# SPDX-FileCopyrightText: 2022 Paul Schmiedmayer and the project authors (see CONTRIBUTORS.md) <paul.schmiedmayer@tum.de>
+#
+# SPDX-License-Identifier: MIT
+#
+
+version: '3.9'
+
+# Run the tracing backend, services have to be started manually
+services:
+  # OpenTelemetry collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/config.yml"]
+    volumes:
+      - ./collector-config.yml:/etc/config.yml
+    ports:
+      - 4317:4317
+    networks: [tracing]
+    depends_on: [jaeger]
+
+  # Jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 16686:16686
+    networks: [tracing]
+
+networks:
+  tracing:

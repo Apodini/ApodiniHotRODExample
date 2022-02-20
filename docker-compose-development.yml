@@ -8,11 +8,76 @@
 
 version: '3.9'
 
-# Run the tracing backend, services have to be started manually
+# Run the tracing backend and all services
 services:
+  ####
+  # Services
+
+  # The frontend Web Service
+  frontend:
+    container_name: "frontend"
+    build:
+      context: .
+      args:
+        service: frontend
+    image: ghcr.io/apodini/hotrod-frontend:latest # Name for the built image
+    ports:
+      - 80:8080 # Expose the web service on port 80 to the outside
+    networks: [services]
+    depends_on:
+      - customer
+      - driver
+      - route
+      - otel-collector
+
+  # The customer Web Service
+  customer:
+    container_name: "customer"
+    build:
+      context: .
+      args:
+        service: customer
+    image: ghcr.io/apodini/hotrod-customer:latest # Name for the built image
+    expose:
+      - 8081 # Expose the web service internally
+    networks: [services]
+    depends_on:
+      - otel-collector
+
+  # The driver Web Service
+  driver:
+    container_name: "driver"
+    build:
+      context: .
+      args:
+        service: driver
+    image: ghcr.io/apodini/hotrod-driver:latest # Name for the built image
+    expose:
+      - 8082 # Expose the web service internally
+    networks: [services]
+    depends_on:
+      - otel-collector
+
+  # The route Web Service
+  route:
+    container_name: "route"
+    build:
+      context: .
+      args:
+        service: route
+    image: ghcr.io/apodini/hotrod-route:latest # Name for the built image
+    expose:
+      - 8083 # Expose the web service internally
+    networks: [services]
+    depends_on:
+      - otel-collector
+
+  ####
+  # Tracing
+
   # OpenTelemetry collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest # TODO: specific version
+    image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/config.yml"]
     volumes:
       - ./collector-config.yml:/etc/config.yml
@@ -23,10 +88,11 @@ services:
 
   # Jaeger
   jaeger:
-    image: jaegertracing/all-in-one:latest # TODO: specific version
+    image: jaegertracing/all-in-one:latest
     ports:
       - 16686:16686
     networks: [tracing]
 
 networks:
+  services:
   tracing:

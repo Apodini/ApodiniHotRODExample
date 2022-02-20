@@ -15,8 +15,12 @@ on:
 
 jobs:
   docker:
-    name: Docker Build and Push Image
+    name: Docker Build and Push Image ${{ matrix.service }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [frontend, customer, driver, route]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -43,7 +47,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          build-args: service=${{ matrix.service }}
           push: true
-          tags: ghcr.io/apodini/template:latest,ghcr.io/apodini/template:${{ steps.latesttag.outputs.tag }}
+          tags: ghcr.io/apodini/hotrod-${{ matrix.service }}:latest,ghcr.io/apodini/hotrod-${{ matrix.service }}:${{ steps.latesttag.outputs.tag }}
       - name: Image digest
         run: echo ${{ steps.buildandpush.outputs.digest }}
