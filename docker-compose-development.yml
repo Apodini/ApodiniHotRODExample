@@ -20,10 +20,15 @@ services:
       context: .
       args:
         service: frontend
-    image: ghcr.io/apodini/hotrod-frontend:latest # Name for the built image
+    image: apodini/hotrod-frontend:latest # Name for the built image
+    environment:
+      SERVICE_CUSTOMER: "http://customer:8081"
+      SERVICE_DRIVER: "http://driver:8082"
+      SERVICE_ROUTE: "http://route:8083"
+      OTLP_HOST: "otel-collector"
     ports:
       - 80:8080 # Expose the web service on port 80 to the outside
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - customer
       - driver
@@ -38,11 +43,13 @@ services:
       args:
         service: customer
     image: ghcr.io/apodini/hotrod-customer:latest # Name for the built image
+    environment:
+      OTLP_HOST: "otel-collector"
     ports:
       - 8081:8081 # Expose the web service on port 8081 to the outside
     expose:
       - 8081 # Expose the web service internally
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - otel-collector
 
@@ -54,11 +61,13 @@ services:
       args:
         service: driver
     image: ghcr.io/apodini/hotrod-driver:latest # Name for the built image
+    environment:
+      OTLP_HOST: "otel-collector"
     ports:
       - 8082:8082 # Expose the web service on port 8082 to the outside
     expose:
       - 8082 # Expose the web service internally
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - otel-collector
 
@@ -70,11 +79,13 @@ services:
       args:
         service: route
     image: ghcr.io/apodini/hotrod-route:latest # Name for the built image
+    environment:
+      OTLP_HOST: "otel-collector"
     ports:
       - 8083:8083 # Expose the web service on port 8083 to the outside
     expose:
       - 8083 # Expose the web service internally
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - otel-collector
 

@@ -16,9 +16,14 @@ services:
   frontend:
     container_name: "frontend"
     image: ghcr.io/apodini/hotrod-frontend:latest # Name for the built image
+    environment:
+      SERVICE_CUSTOMER: "http://customer:8081"
+      SERVICE_DRIVER: "http://driver:8082"
+      SERVICE_ROUTE: "http://route:8083"
+      OTLP_HOST: "otel-collector"
     ports:
       - 80:8080 # Expose the web service on port 80 to the outside
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - customer
       - driver
@@ -29,9 +34,11 @@ services:
   customer:
     container_name: "customer"
     image: ghcr.io/apodini/hotrod-customer:latest # Name for the built image
+    environment:
+      OTLP_HOST: "otel-collector"
     expose:
       - 8081 # Expose the web service internally
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - otel-collector
 
@@ -39,9 +46,11 @@ services:
   driver:
     container_name: "driver"
     image: ghcr.io/apodini/hotrod-driver:latest # Name for the built image
+    environment:
+      OTLP_HOST: "otel-collector"
     expose:
       - 8082 # Expose the web service internally
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - otel-collector
 
@@ -49,9 +58,11 @@ services:
   route:
     container_name: "route"
     image: ghcr.io/apodini/hotrod-route:latest # Name for the built image
+    environment:
+      OTLP_HOST: "otel-collector"
     expose:
       - 8083 # Expose the web service internally
-    networks: [services]
+    networks: [services, tracing]
     depends_on:
       - otel-collector
 
