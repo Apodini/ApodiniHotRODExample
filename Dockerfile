@@ -13,7 +13,6 @@ FROM swiftlang/swift:nightly-5.5-focal as build
 
 # Build a specific service
 ARG service
-ENV service=$service
 
 # Install OS updates
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -34,13 +33,13 @@ RUN swift build --product $service -c release
 WORKDIR /staging
 
 # Copy main executable to staging area
-RUN cp "$(swift build --package-path /build --product $service -c release --show-bin-path)/$service" ./
+RUN cp "$(swift build --package-path /build --product $service -c release --show-bin-path)/$service" ./service
 
 # Copy resources from the resources directory if the directories exist
 # Ensure that by default, neither the directory nor any of its contents are writable.
 RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.bundle" ] \
     && mv "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.bundle" ./ \
-    && chmod -R a-w .ApodiniHotRODExample_frontend.bundle \
+    && chmod -R a-w ApodiniHotRODExample_frontend.bundle \
     || echo No resources to copy
 
 # ================================
@@ -68,4 +67,4 @@ USER apodini:apodini
 
 # Start the Apodini service when the image is run.
 # The port can be adapted using the `--port` argument.
-ENTRYPOINT ["./$service"]
+ENTRYPOINT ["./service"]
