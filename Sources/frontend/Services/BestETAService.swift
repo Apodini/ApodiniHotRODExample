@@ -14,6 +14,12 @@ import Models
 import Tracing
 
 final class BestETAService {
+    enum Constants {
+        static let customerService = ProcessInfo.processInfo.environment["SERVICE_CUSTOMER"] ?? "http://localhost:8081"
+        static let driverService = ProcessInfo.processInfo.environment["SERVICE_DRIVER"] ?? "http://localhost:8082"
+        static let routeService = ProcessInfo.processInfo.environment["SERVICE_ROUTE"] ?? "http://localhost:8083"
+    }
+
     private let httpClient: HTTPClient
     private let logger: Logger
     private let instrument: Instrument
@@ -77,7 +83,7 @@ struct ETAResponse: Content {
 
 extension BestETAService {
     private func getCustomer(customerId: String, baggage: Baggage) async throws -> Customer {
-        try await getRequest(to: "http://0.0.0.0:8081/customer?customer=\(customerId)", baggage: baggage)
+        try await getRequest(to: "\(Constants.customerService)/customer?customer=\(customerId)", baggage: baggage)
             .flatMapThrowing { response -> Customer in
                 guard (200..<300).contains(response.status.code) else {
                     throw ApodiniError(type: .notFound, reason: "\(response.status)")
@@ -97,7 +103,7 @@ extension BestETAService {
             var locations: [DriverLocation]
         }
 
-        return try await getRequest(to: "http://0.0.0.0:8082/driver?location=\(location)", baggage: baggage)
+        return try await getRequest(to: "\(Constants.driverService)/driver?location=\(location)", baggage: baggage)
             .flatMapThrowing { response -> [DriverLocation] in
                 guard (200..<300).contains(response.status.code) else {
                     throw ApodiniError(type: .notFound, reason: "\(response.status)")
@@ -151,7 +157,7 @@ extension BestETAService {
     }
 
     private func getRoute(pickup: String, dropoff: String, baggage: Baggage) throws -> EventLoopFuture<Route> {
-        try getRequest(to: "http://0.0.0.0:8083/route?pickup=\(pickup)&dropoff=\(dropoff)", baggage: baggage)
+        try getRequest(to: "\(Constants.routeService)/route?pickup=\(pickup)&dropoff=\(dropoff)", baggage: baggage)
             .flatMapThrowing { response -> Route in
                 self.logger.info("Route response", metadata: ["status_code": .stringConvertible(response.status.code)])
                 guard (200..<300).contains(response.status.code) else {

@@ -11,6 +11,7 @@ import ApodiniHTTP
 import ApodiniObserve
 import ApodiniObserveOpenTelemetry
 import ArgumentParser
+import Foundation
 
 @main
 struct CustomerWebService: WebService {
@@ -23,7 +24,11 @@ struct CustomerWebService: WebService {
 
         TracingConfiguration(
             InstrumentConfiguration(JaegerBaggageExtractorInstrument()),
-            .defaultOpenTelemetry(serviceName: "customer")
+            .defaultOpenTelemetry(
+                serviceName: "customer",
+                otlpHost: ProcessInfo.processInfo.environment["OTLP_HOST"],
+                otlpPort: UInt(ProcessInfo.processInfo.environment["OTLP_PORT"] ?? "")
+            )
         )
     }
 
