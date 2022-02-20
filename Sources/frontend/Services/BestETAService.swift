@@ -19,13 +19,6 @@ final class BestETAService {
     private let instrument: Instrument
     private let tracer: Tracer
 
-    private let formatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .abbreviated
-        formatter.zeroFormattingBehavior = .dropLeading
-        return formatter
-    }()
-
     init(
         httpClient: HTTPClient,
         logger: Logger,
@@ -202,7 +195,7 @@ extension BestETAService {
 
 extension BestETAService {
     func format(timeInterval: TimeInterval) -> String {
-        formatter.string(from: timeInterval) ?? "n/a"
+        "\(timeInterval.rounded()) s"
     }
 }
 
