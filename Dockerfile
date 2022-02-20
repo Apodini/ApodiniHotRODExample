@@ -24,7 +24,8 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
 WORKDIR /build
 
 # Copy all source files
-COPY . .
+COPY Package.swift Package.resolved .
+COPY Sources Sources
 
 # Build everything, with optimizations
 RUN swift build --product $service -c release
@@ -37,9 +38,9 @@ RUN cp "$(swift build --package-path /build --product $service -c release --show
 
 # Copy resources from the resources directory if the directories exist
 # Ensure that by default, neither the directory nor any of its contents are writable.
-RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.bundle" ] \
-    && mv "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.bundle" ./ \
-    && chmod -R a-w ApodiniHotRODExample_frontend.bundle \
+RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.resources" ] \
+    && mv "$(swift build --package-path /build -c release --show-bin-path)/ApodiniHotRODExample_frontend.resources" ./ \
+    && chmod -R a-w ApodiniHotRODExample_frontend.resources \
     || echo No resources to copy
 
 # ================================
