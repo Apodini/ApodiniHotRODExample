@@ -35,8 +35,8 @@ let package = Package(
         )
     ],
     dependencies: [
-         .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/automatic-tracing"),
-         .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .branch("bots/update-dependencies"))
+        .package(url: "https://github.com/Apodini/Apodini.git", branch: "feature/automatic-tracing"),
+        .package(url: "https://github.com/Apodini/ApodiniAsyncHTTPClient.git", .branch("bots/update-dependencies"))
     ],
     targets: [
         .executableTarget(
