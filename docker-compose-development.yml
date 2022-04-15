@@ -20,7 +20,7 @@ services:
       context: .
       args:
         service: frontend
-    image: apodini/hotrod-frontend:latest # Name for the built image
+    image: ghcr.io/apodini/hotrod-frontend:latest # Name for the built image
     environment:
       SERVICE_CUSTOMER: "http://customer:8081"
       SERVICE_DRIVER: "http://driver:8082"

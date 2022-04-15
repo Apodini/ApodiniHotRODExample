@@ -9,7 +9,7 @@
 # ================================
 # Build image
 # ================================
-FROM swiftlang/swift:nightly-5.5-focal as build
+FROM swift as build
 
 # Build a specific service
 ARG service
@@ -46,7 +46,7 @@ RUN [ -d "$(swift build --package-path /build -c release --show-bin-path)/Apodin
 # ================================
 # Run image
 # ================================
-FROM swiftlang/swift:nightly-5.5-focal-slim as run
+FROM swift:slim as run
 
 # Make sure all system packages are up to date.
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
