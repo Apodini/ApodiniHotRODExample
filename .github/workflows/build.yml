@@ -20,6 +20,7 @@ jobs:
     uses: Apodini/.github/.github/workflows/build-and-test.yml@v1
     with:
       packagename: ApodiniHotRODExample
+      test: false
   docker-compose-test:
     name: Docker Compose Test
     uses: Apodini/.github/.github/workflows/docker-compose-test.yml@v1
