@@ -43,7 +43,7 @@ final class RedisService {
                 .map { _ in
                     String(format: "T7%05dC", Int.random(in: 0..<100000))
                 }
-            logger.info("Found drivers", metadata: ["drivers": .array(drivers.map({ .string($0) }))])
+            logger.info("Found drivers", metadata: ["drivers": .array(drivers.map { .string($0) })])
 
             return drivers
         }

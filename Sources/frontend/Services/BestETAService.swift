@@ -43,10 +43,10 @@ final class BestETAService {
 
         // can't set add the customer to the baggage because it's read-only in swift-distributed-tracing
         let drivers = try await getNearestDrivers(location: customer.location, baggage: span.baggage)
-        logger.info("Found drivers", metadata: ["drivers": .array(drivers.map({ .string($0.driverId) }))])
+        logger.info("Found drivers", metadata: ["drivers": .array(drivers.map { .string($0.driverId) })])
 
         let results = try await getRoutes(customer: customer, drivers: drivers, baggage: span.baggage)
-        logger.info("Found routes", metadata: ["routes": .array(results.map({ .stringConvertible($0.route.eta) }))])
+        logger.info("Found routes", metadata: ["routes": .array(results.map { .stringConvertible($0.route.eta) })])
 
         guard let response = results.min(by: { $0.route.eta < $1.route.eta }) else {
             throw ApodiniError(type: .serverError, reason: "no routes found")
@@ -56,13 +56,15 @@ final class BestETAService {
 
         // manually record span event
         // in the example, logs are automatically recorded as span events
-        span.addEvent(.init(
-            name: "Dispatch successful",
-            attributes: [
-                "driver": .string(response.driver),
-                "eta": .string(format(timeInterval: response.route.eta))
-            ]
-        ))
+        span.addEvent(
+            .init(
+                name: "Dispatch successful",
+                attributes: [
+                    "driver": .string(response.driver),
+                    "eta": .string(format(timeInterval: response.route.eta))
+                ]
+            )
+        )
 
         return ETAResponse(
             eta: Int(response.route.eta * 1000000 * 1000), // frontend expects nanoseconds
