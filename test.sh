@@ -1,24 +1,9 @@
-#                   
+#
 # This source file is part of the Apodini HotROD example open source project
-# 
+#
 # SPDX-FileCopyrightText: 2022 Paul Schmiedmayer and the project authors (see CONTRIBUTORS.md) <paul.schmiedmayer@tum.de>
-# 
+#
 # SPDX-License-Identifier: MIT
-# 
+#
 
-# Apodini .gitignore File
-
-# Swift Package Manager
-*.xcodeproj
-.swiftpm
-.build/
-
-# IDE related folders
-.idea
-
-# Xcode User settings
-xcuserdata/
-
-# Other files
-.DS_Store
-.env
+curl --fail http://localhost/
